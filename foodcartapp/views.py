@@ -1,9 +1,9 @@
-import json
-from rest_framework.response import Response
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.templatetags.static import static
+from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from .models import Product, Order, OrderElements
 
@@ -63,8 +63,24 @@ def product_list_api(request):
 @api_view(['POST'])
 def register_order(request):
     frontend_order = request.data
-    if not frontend_order.get("products"):
-        return JsonResponse({})
+    try:
+        products = frontend_order["products"]
+    except KeyError:
+        content = {"products": "Обязательное поле"}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+    if isinstance(products, str):
+        content = {
+            "products": "Ожидался list со значениями, но был получен 'str'"
+        }
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+    if products is None:
+        content = {
+            "products": "Это поле не может быть пустым"
+        }
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+    if not products:
+        content = {"products": "Этот список не может быть пустым"}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
     order = Order.objects.create(
         first_name=frontend_order.get("firstname"),
         last_name=frontend_order.get("lastname"),
