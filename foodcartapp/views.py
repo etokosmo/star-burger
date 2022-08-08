@@ -14,12 +14,20 @@ class OrderElementsSerializer(ModelSerializer):
 
 
 class OrderSerializer(ModelSerializer):
-    products = OrderElementsSerializer(many=True, allow_empty=False)
+    products = OrderElementsSerializer(many=True,
+                                       allow_empty=False,
+                                       write_only=True)
 
     class Meta:
         model = Order
-        fields = ['firstname', 'lastname', 'phonenumber', 'address',
+        fields = ['id', 'firstname', 'lastname', 'phonenumber', 'address',
                   'products']
+
+    def create(self, validated_data):
+        return Order.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        return Order.objects.update(**validated_data)
 
 
 def banners_list_api(request):
@@ -93,4 +101,7 @@ def register_order(request):
             product=product,
             quantity=quantity
         )
-    return Response({})
+    serializer = OrderSerializer(order)
+    # serializer.data
+    # content = JSONRenderer().render(serializer.data)
+    return Response(serializer.data)
