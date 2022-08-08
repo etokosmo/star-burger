@@ -1,3 +1,4 @@
+import phonenumbers
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.templatetags.static import static
@@ -81,13 +82,57 @@ def register_order(request):
     if not products:
         content = {"products": "Этот список не может быть пустым"}
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        first_name = frontend_order["firstname"]
+        last_name = frontend_order["lastname"]
+        phone_number = frontend_order["phonenumber"]
+        address = frontend_order["address"]
+    except KeyError:
+        content = {
+            "firstname, lastname, phonenumber, address": "Обязательное поле"
+        }
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+    if first_name == last_name == phone_number == address is None:
+        content = {
+            "firstname, lastname, phonenumber, address": "Это поле не может быть пустым"
+        }
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+    if first_name is None:
+        content = {"firstname": "Это поле не может быть пустым"}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+    if not isinstance(first_name, str):
+        content = {"firstname": "Not a valid string"}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+    if not phone_number:
+        content = {"phonenumber": "Это поле не может быть пустым"}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+    if not phonenumbers.is_valid_number(
+        phonenumbers.parse(phone_number, "RU")):
+        content = {"phonenumber": "Введен некорректный номер телефона"}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+    for element in products:
+        product_id, quantity = element.values()
+        try:
+            Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            content = {"products": f"Недопустимый первичный ключ {product_id}"}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
     order = Order.objects.create(
-        first_name=frontend_order.get("firstname"),
-        last_name=frontend_order.get("lastname"),
-        phone_number=frontend_order.get("phonenumber"),
-        address=frontend_order.get("address")
+        first_name=first_name,
+        last_name=last_name,
+        phone_number=phone_number,
+        address=address
     )
-    for element in frontend_order.get("products"):
+
+    for element in products:
         product_id, quantity = element.values()
         OrderElements.objects.create(
             order=order,
