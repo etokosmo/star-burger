@@ -1,12 +1,25 @@
-import phonenumbers
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.templatetags.static import static
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.serializers import ModelSerializer
 
 from .models import Product, Order, OrderElements
+
+
+class OrderElementsSerializer(ModelSerializer):
+    class Meta:
+        model = OrderElements
+        fields = ['product', 'quantity']
+
+
+class OrderSerializer(ModelSerializer):
+    products = OrderElementsSerializer(many=True, allow_empty=False)
+
+    class Meta:
+        model = Order
+        fields = ['firstname', 'lastname', 'phonenumber', 'address',
+                  'products']
 
 
 def banners_list_api(request):
@@ -63,80 +76,21 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
-    frontend_order = request.data
-    try:
-        products = frontend_order["products"]
-    except KeyError:
-        content = {"products": "Обязательное поле"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-    if isinstance(products, str):
-        content = {
-            "products": "Ожидался list со значениями, но был получен 'str'"
-        }
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-    if products is None:
-        content = {
-            "products": "Это поле не может быть пустым"
-        }
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-    if not products:
-        content = {"products": "Этот список не может быть пустым"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        first_name = frontend_order["firstname"]
-        last_name = frontend_order["lastname"]
-        phone_number = frontend_order["phonenumber"]
-        address = frontend_order["address"]
-    except KeyError:
-        content = {
-            "firstname, lastname, phonenumber, address": "Обязательное поле"
-        }
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-    if first_name == last_name == phone_number == address is None:
-        content = {
-            "firstname, lastname, phonenumber, address": "Это поле не может быть пустым"
-        }
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-    if first_name is None:
-        content = {"firstname": "Это поле не может быть пустым"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-    if not isinstance(first_name, str):
-        content = {"firstname": "Not a valid string"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-    if not phone_number:
-        content = {"phonenumber": "Это поле не может быть пустым"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-    if not phonenumbers.is_valid_number(
-        phonenumbers.parse(phone_number, "RU")):
-        content = {"phonenumber": "Введен некорректный номер телефона"}
-        return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-    for element in products:
-        product_id, quantity = element.values()
-        try:
-            Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            content = {"products": f"Недопустимый первичный ключ {product_id}"}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
     order = Order.objects.create(
-        first_name=first_name,
-        last_name=last_name,
-        phone_number=phone_number,
-        address=address
+        firstname=serializer.validated_data['firstname'],
+        lastname=serializer.validated_data['lastname'],
+        phonenumber=serializer.validated_data['phonenumber'],
+        address=serializer.validated_data['address']
     )
 
-    for element in products:
-        product_id, quantity = element.values()
+    for element in serializer.validated_data['products']:
+        product, quantity = element.values()
         OrderElements.objects.create(
             order=order,
-            product=get_object_or_404(Product, id=product_id),
+            product=product,
             quantity=quantity
         )
     return Response({})
