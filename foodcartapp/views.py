@@ -101,7 +101,5 @@ def register_order(request):
             product=product,
             quantity=quantity
         )
-    serializer = OrderSerializer(order)
-    # serializer.data
-    # content = JSONRenderer().render(serializer.data)
-    return Response(serializer.data)
+    serialize_order = OrderSerializer(order)
+    return Response(serialize_order.data)
