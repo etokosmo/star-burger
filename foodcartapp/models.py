@@ -128,13 +128,13 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
 
     def unprocessed(self):
-        unprocessed_orders = self.filter(status='Подтверждение')
+        unprocessed_orders = self.filter(status='Необработанный')
         return unprocessed_orders
 
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('Подтверждение', 'Подтверждение'),
+        ('Необработанный', 'Необработанный'),
         ('Готовится', 'Готовится'),
         ('Доставка', 'Доставка'),
         ('Выполнен', 'Выполнен'),
@@ -152,9 +152,9 @@ class Order(models.Model):
     )
     status = models.CharField(
         verbose_name="Статус заказа",
-        max_length=13,
+        max_length=14,
         choices=STATUS_CHOICES,
-        default='Подтверждение',
+        default='Необработанный',
         db_index=True
     )
     comment = models.TextField(
