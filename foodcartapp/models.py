@@ -139,6 +139,10 @@ class Order(models.Model):
         ('Доставка', 'Доставка'),
         ('Выполнен', 'Выполнен'),
     ]
+    PAYMENT_CHOICES = [
+        ('Электронно', 'Электронно'),
+        ('Наличностью', 'Наличностью'),
+    ]
     firstname = models.CharField(verbose_name="Имя", max_length=50)
     lastname = models.CharField(verbose_name="Фамилия", max_length=50)
     phonenumber = PhoneNumberField(
@@ -155,6 +159,14 @@ class Order(models.Model):
         max_length=14,
         choices=STATUS_CHOICES,
         default='Необработанный',
+        db_index=True
+    )
+    payment = models.CharField(
+        verbose_name="Способ оплаты",
+        max_length=11,
+        choices=PAYMENT_CHOICES,
+        blank=True,
+        null=True,
         db_index=True
     )
     comment = models.TextField(
