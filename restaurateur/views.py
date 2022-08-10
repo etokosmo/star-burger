@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
+from django.db.models import ExpressionWrapper, DecimalField
 from django.db.models import Sum, F
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
@@ -99,7 +100,11 @@ def view_restaurants(request):
 def view_orders(request):
     orders = Order.objects.unprocessed().annotate(
         total_price=Sum(
-            F('order_elements__quantity') * F('order_elements__product__price')
+            ExpressionWrapper(
+                F('order_elements__quantity') * F(
+                    'order_elements__product__price'),
+                output_field=DecimalField()
+            )
         )
     )
     return render(request, template_name='order_items.html', context={
