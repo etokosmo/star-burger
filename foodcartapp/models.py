@@ -124,7 +124,20 @@ class RestaurantMenuItem(models.Model):
         return f"{self.restaurant.name} - {self.product.name}"
 
 
+class OrderQuerySet(models.QuerySet):
+
+    def unprocessed(self):
+        unprocessed_orders = self.filter(status='Подтверждение')
+        return unprocessed_orders
+
+
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('Подтверждение', 'Подтверждение'),
+        ('Готовится', 'Готовится'),
+        ('Доставка', 'Доставка'),
+        ('Выполнен', 'Выполнен'),
+    ]
     firstname = models.CharField(verbose_name="Имя", max_length=50)
     lastname = models.CharField(verbose_name="Фамилия", max_length=50)
     phonenumber = PhoneNumberField(
@@ -136,6 +149,15 @@ class Order(models.Model):
         max_length=100,
         db_index=True
     )
+    status = models.CharField(
+        verbose_name="Статус заказа",
+        max_length=13,
+        choices=STATUS_CHOICES,
+        default='Подтверждение',
+        db_index=True
+    )
+
+    objects = OrderQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Заказ'
