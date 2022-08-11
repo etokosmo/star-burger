@@ -106,7 +106,7 @@ def view_orders(request):
                 output_field=DecimalField()
             )
         )
-    )
+    ).get_available_restaurants()
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
     })

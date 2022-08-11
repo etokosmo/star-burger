@@ -128,20 +128,41 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
 
     def unprocessed(self):
-        unprocessed_orders = self.filter(status='Необработанный')
+        unprocessed_orders = self.exclude(status=Order.DONE).order_by('-status', 'registrated_at')
         return unprocessed_orders
+
+    def get_available_restaurants(self):
+        for order in self:
+            products = [order_elements.product for order_elements in
+                        order.order_elements.select_related('product')]
+
+            product_restaurants = {}
+            for product in products:
+                restaurants = [item.restaurant for item in
+                               product.menu_items.filter(
+                                   availability=True).select_related(
+                                   'restaurant')]
+                product_restaurants[product] = restaurants
+            order.restaurants = set.intersection(
+                *[set(restaurants) for restaurants in
+                  product_restaurants.values()])
+        return self
 
 
 class Order(models.Model):
+    UNPROCCESSED = 'UP'
+    IN_WORK = 'IW'
+    IN_DELIVERY = 'ID'
+    DONE = 'DN'
     STATUS_CHOICES = [
-        ('Необработанный', 'Необработанный'),
-        ('Готовится', 'Готовится'),
-        ('Доставка', 'Доставка'),
-        ('Выполнен', 'Выполнен'),
+        (UNPROCCESSED, 'Необработанный'),
+        (IN_WORK, 'Готовится'),
+        (IN_DELIVERY, 'Доставка'),
+        (DONE, 'Выполнен'),
     ]
     PAYMENT_CHOICES = [
-        ('Электронно', 'Электронно'),
-        ('Наличностью', 'Наличностью'),
+        ('CARD', 'Электронно'),
+        ('CASH', 'Наличностью'),
     ]
     firstname = models.CharField(verbose_name="Имя", max_length=50)
     lastname = models.CharField(verbose_name="Фамилия", max_length=50)
@@ -156,14 +177,14 @@ class Order(models.Model):
     )
     status = models.CharField(
         verbose_name="Статус заказа",
-        max_length=14,
+        max_length=2,
         choices=STATUS_CHOICES,
         default='Необработанный',
         db_index=True
     )
     payment = models.CharField(
         verbose_name="Способ оплаты",
-        max_length=11,
+        max_length=4,
         choices=PAYMENT_CHOICES,
         blank=True,
         null=True,
@@ -189,6 +210,14 @@ class Order(models.Model):
         blank=True,
         null=True,
         db_index=True
+    )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        verbose_name='Готовящий ресторан',
+        related_name='orders',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
     )
 
     objects = OrderQuerySet.as_manager()
