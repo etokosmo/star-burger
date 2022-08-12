@@ -44,15 +44,19 @@
       <td>
         {% if item.restaurant %}
           {{ item.restaurant }}
+        {% elif not item.restaurants %}
+          В ресторанах нет одного из блюд
+        {% elif not item.distances %}
+          Ошибка определения координат
         {% else %}
-          <details>
-            <summary>Может быть приготовлен ресторанами:</summary>
-            <ul>
-              {% for restaurant in item.restaurants %}
-              <li>{{ restaurant.name }}</li>
-              {% endfor %}
-            </ul>
-          </details>
+        <details>
+          <summary>Может быть приготовлен ресторанами:</summary>
+          <ul>
+            {% for restaurant, distance in item.distances.items %}
+            <li>{{ restaurant.name }} - {{ distance }} км.</li>
+            {% endfor %}
+          </ul>
+        </details>
         {% endif %}
       </td>
       <td><a
