@@ -125,6 +125,8 @@ class ProductAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderElementsInline]
     raw_id_fields = ("restaurant",)
+    list_display = ["firstname", "lastname", "address", "status", "payment",
+                    "restaurant", "status"]
 
     def response_change(self, request, obj):
         res = super(OrderAdmin, self).response_change(request, obj)
@@ -141,3 +143,4 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderElements)
 class OrderElementsAdmin(admin.ModelAdmin):
     raw_id_fields = ("order", "product")
+    list_display = ["order", "product", "quantity", "price_in_order"]

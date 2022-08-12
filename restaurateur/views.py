@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 from geopy import distance
-
+from geoplaces.models import GeoPlace
 from foodcartapp.models import Product, Restaurant, Order
 from star_burger import settings
 
@@ -120,27 +120,33 @@ def fetch_coordinates(apikey, address):
 
 def get_addresses_coordinates(addresses: list) -> dict:
     addresses_coordinates = {}
+    geo_places = GeoPlace.objects.filter(address__in=addresses)
+    geo_places_addresses = [geo_place.address for geo_place in geo_places]
     for address in addresses:
+        if address in geo_places_addresses:
+            continue
         try:
             lon, lat = fetch_coordinates(settings.YANDEX_GEO_API_TOKEN,
                                          address)
         except TypeError:
             continue
         addresses_coordinates[address] = (lat, lon)
+        place = GeoPlace(address=address, latitude=lat, longitude=lon)
+        place.save()
+    for place in geo_places:
+        if place.address not in addresses_coordinates:
+            addresses_coordinates[place.address] = (
+                place.latitude, place.longitude)
     return addresses_coordinates
 
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.unprocessed().annotate(
-        total_price=Sum(
-            ExpressionWrapper(
-                F('order_elements__quantity') * F(
-                    'order_elements__product__price'),
-                output_field=DecimalField()
-            )
-        )
-    ).get_available_restaurants()
+    orders = Order.objects.unprocessed() \
+        .select_related('restaurant') \
+        .prefetch_related('order_elements__product') \
+        .get_total_price() \
+        .get_available_restaurants()
     orders_coordinates = get_addresses_coordinates(
         [order.address for order in orders]
     )

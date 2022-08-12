@@ -1,5 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import ExpressionWrapper, DecimalField
+from django.db.models import Sum, F
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -127,6 +129,13 @@ class RestaurantMenuItem(models.Model):
 
 class OrderQuerySet(models.QuerySet):
 
+    def get_total_price(self):
+        orders = self.annotate(total_price=Sum(ExpressionWrapper(
+            F('order_elements__quantity') * F(
+                'order_elements__product__price'),
+            output_field=DecimalField())))
+        return orders
+
     def unprocessed(self):
         unprocessed_orders = self.exclude(status=Order.DONE).order_by(
             '-status', 'registrated_at')
@@ -144,29 +153,13 @@ class OrderQuerySet(models.QuerySet):
                 restaurant_products[item.restaurant].add(item.product)
         for order in self:
             products = [order_elements.product for order_elements in
-                        order.order_elements.select_related('product')]
+                        order.order_elements.all()]
             available_restaurants = []
             for restaurant, menu in restaurant_products.items():
                 if set(products).issubset(menu):
                     available_restaurants.append(restaurant)
 
             order.restaurants = available_restaurants
-
-        # TODO способ 2
-        # for order in self:
-        #     products = [order_elements.product for order_elements in
-        #                 order.order_elements.select_related('product')]
-        #
-        #     product_restaurants = {}
-        #     for product in products:
-        #         restaurants = [item.restaurant for item in
-        #                        product.menu_items.filter(
-        #                            availability=True).select_related(
-        #                            'restaurant')]
-        #         product_restaurants[product] = restaurants
-        #     order.restaurants = set.intersection(
-        #         *[set(restaurants) for restaurants in
-        #           product_restaurants.values()])
         return self
 
 
@@ -244,6 +237,7 @@ class Order(models.Model):
     objects = OrderQuerySet.as_manager()
 
     class Meta:
+        ordering = ['-status', 'registrated_at']
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
 
@@ -261,7 +255,7 @@ class OrderElements(models.Model):
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
-        verbose_name="Количество товара",
+        verbose_name="Продукт",
         related_name='order_elements',
     )
     quantity = models.PositiveIntegerField(
