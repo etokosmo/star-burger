@@ -128,24 +128,45 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
 
     def unprocessed(self):
-        unprocessed_orders = self.exclude(status=Order.DONE).order_by('-status', 'registrated_at')
+        unprocessed_orders = self.exclude(status=Order.DONE).order_by(
+            '-status', 'registrated_at')
         return unprocessed_orders
 
     def get_available_restaurants(self):
+        restaurant_menu_items = RestaurantMenuItem.objects.filter(
+            availability=True).select_related('product').select_related(
+            'restaurant')
+        restaurant_products = {}
+        for item in restaurant_menu_items:
+            if not restaurant_products.get(item.restaurant):
+                restaurant_products[item.restaurant] = {item.product}
+            else:
+                restaurant_products[item.restaurant].add(item.product)
         for order in self:
             products = [order_elements.product for order_elements in
                         order.order_elements.select_related('product')]
+            available_restaurants = []
+            for restaurant, menu in restaurant_products.items():
+                if set(products).issubset(menu):
+                    available_restaurants.append(restaurant)
 
-            product_restaurants = {}
-            for product in products:
-                restaurants = [item.restaurant for item in
-                               product.menu_items.filter(
-                                   availability=True).select_related(
-                                   'restaurant')]
-                product_restaurants[product] = restaurants
-            order.restaurants = set.intersection(
-                *[set(restaurants) for restaurants in
-                  product_restaurants.values()])
+            order.restaurants = available_restaurants
+
+        # TODO способ 2
+        # for order in self:
+        #     products = [order_elements.product for order_elements in
+        #                 order.order_elements.select_related('product')]
+        #
+        #     product_restaurants = {}
+        #     for product in products:
+        #         restaurants = [item.restaurant for item in
+        #                        product.menu_items.filter(
+        #                            availability=True).select_related(
+        #                            'restaurant')]
+        #         product_restaurants[product] = restaurants
+        #     order.restaurants = set.intersection(
+        #         *[set(restaurants) for restaurants in
+        #           product_restaurants.values()])
         return self
 
 
