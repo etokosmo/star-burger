@@ -1,10 +1,11 @@
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
+from django.urls import reverse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 
-from banners.models import Banner
+from banners.models import Banner, Slug
 from .models import Product, Order, OrderElements
 
 
@@ -31,9 +32,10 @@ class OrderSerializer(ModelSerializer):
         return Order.objects.update(**validated_data)
 
 
-def banners_list_api(request):
-    banners = Banner.objects.all()
+def get_banner(request, slug_title):
+    slug = Slug.objects.prefetch_related("banners").get(slug_title=slug_title)
     dumped_banners = []
+    banners = slug.banners.all()
     for banner in banners:
         dumped_banner = {
             'title': banner.title,
@@ -46,6 +48,11 @@ def banners_list_api(request):
         safe=False,
         json_dumps_params={'ensure_ascii': False}
     )
+
+
+def banners_list_api(request):
+    return HttpResponseRedirect(
+        reverse('foodcartapp:banner', kwargs={'slug_title': 'top_banner'}))
 
 
 def product_list_api(request):

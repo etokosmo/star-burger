@@ -7,6 +7,17 @@ def get_upload_path(instance, filename):
     return Path("banner") / filename
 
 
+class Slug(models.Model):
+    slug_title = models.SlugField(
+        max_length=255,
+        unique=True,
+        db_index=True,
+        verbose_name="Слаг")
+
+    def __str__(self):
+        return self.slug_title
+
+
 class Banner(models.Model):
     title = models.CharField(
         verbose_name="Заголовок",
@@ -19,6 +30,14 @@ class Banner(models.Model):
     )
     text = models.TextField(
         verbose_name="Текст",
+    )
+    slug = models.ForeignKey(
+        Slug,
+        on_delete=models.CASCADE,
+        verbose_name="Слаг",
+        related_name="banners",
+        blank=True,
+        null=True
     )
 
     def __str__(self):
