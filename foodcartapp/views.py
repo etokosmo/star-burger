@@ -52,7 +52,8 @@ def get_banner(request, slug_title):
 
 def banners_list_api(request):
     return HttpResponseRedirect(
-        reverse('foodcartapp:banner', kwargs={'slug_title': 'top_banner'}))
+        reverse('foodcartapp:banner',
+                kwargs={'slug_title': 'start-page-header'}))
 
 
 def product_list_api(request):
