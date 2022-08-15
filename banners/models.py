@@ -39,6 +39,14 @@ class Banner(models.Model):
         blank=True,
         null=True
     )
+    order = models.PositiveIntegerField(
+        verbose_name='Порядок',
+        blank=True,
+        default=0
+    )
+
+    class Meta:
+        ordering = ["-order"]
 
     def __str__(self):
         return f"{self.title} - {self.text}"

@@ -28,7 +28,8 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'rest_framework',
     'geoplaces',
-    'banners'
+    'banners',
+    'adminsortable2',
 ]
 
 MIDDLEWARE = [
