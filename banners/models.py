@@ -14,6 +14,10 @@ class Slug(models.Model):
         db_index=True,
         verbose_name="Слаг")
 
+    class Meta:
+        verbose_name = "Slug"
+        verbose_name_plural = "Slugs"
+
     def __str__(self):
         return self.slug_title
 
@@ -47,6 +51,8 @@ class Banner(models.Model):
 
     class Meta:
         ordering = ["-order"]
+        verbose_name = "Баннер"
+        verbose_name_plural = "Баннеры"
 
     def __str__(self):
         return f"{self.title} - {self.text}"
