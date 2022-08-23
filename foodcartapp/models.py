@@ -147,7 +147,7 @@ class OrderQuerySet(models.QuerySet):
 
     def not_done_orders(self):
         not_done_orders = self.exclude(status=Order.DONE).order_by(
-            '-status', 'registrated_at')
+            '-status', '-registrated_at')
         return not_done_orders
 
     def get_available_restaurants(self):
@@ -243,7 +243,7 @@ class Order(models.Model):
     objects = OrderQuerySet.as_manager()
 
     class Meta:
-        ordering = ['-status', 'registrated_at']
+        ordering = ['-status', '-registrated_at']
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
 

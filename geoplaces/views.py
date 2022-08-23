@@ -37,8 +37,7 @@ def get_addresses_coordinates(addresses: list) -> dict:
         except TypeError:
             continue
         addresses_coordinates[address] = (lat, lon)
-        place = GeoPlace(address=address, latitude=lat, longitude=lon)
-        place.save()
+        GeoPlace.objects.create(address=address, latitude=lat, longitude=lon)
     for place in geo_places:
         if place.address not in addresses_coordinates:
             addresses_coordinates[place.address] = (
