@@ -129,11 +129,16 @@ class RestaurantMenuItem(models.Model):
 
 class OrderQuerySet(models.QuerySet):
 
-    def get_total_price(self):
+    def get_total_price_at_current_time(self):
         orders = self.annotate(total_price=Sum(ExpressionWrapper(
             F('elements__quantity') * F(
                 'elements__product__price'),
             output_field=DecimalField())))
+        return orders
+
+    def get_total_price(self):
+        orders = self.annotate(
+            total_price=Sum('elements__full_price_in_order'))
         return orders
 
     def unprocessed(self):
