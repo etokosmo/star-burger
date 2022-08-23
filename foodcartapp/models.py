@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import ExpressionWrapper, DecimalField
@@ -152,12 +154,9 @@ class OrderQuerySet(models.QuerySet):
         restaurant_menu_items = RestaurantMenuItem.objects.filter(
             availability=True).select_related('product').select_related(
             'restaurant')
-        restaurant_products = {}
+        restaurant_products = defaultdict(set)
         for item in restaurant_menu_items:
-            if not restaurant_products.get(item.restaurant):
-                restaurant_products[item.restaurant] = {item.product}
-            else:
-                restaurant_products[item.restaurant].add(item.product)
+            restaurant_products[item.restaurant].add(item.product)
         for order in self:
             products = [order_elements.product for order_elements in
                         order.elements.all()]
