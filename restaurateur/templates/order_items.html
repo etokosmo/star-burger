@@ -42,8 +42,8 @@
       <td>{{ item.address }}</td>
       <td>{{ item.comment }}</td>
       <td>
-        {% if item.restaurant %}
-          {{ item.restaurant }}
+        {% if item.cooking_restaurant %}
+          {{ item.cooking_restaurant }}
         {% elif not item.restaurants %}
           В ресторанах нет одного из блюд
         {% elif not item.distances %}
