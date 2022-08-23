@@ -143,10 +143,10 @@ class OrderQuerySet(models.QuerySet):
             output_field=DecimalField())))
         return orders
 
-    def unprocessed(self):
-        unprocessed_orders = self.exclude(status=Order.DONE).order_by(
+    def not_done_orders(self):
+        not_done_orders = self.exclude(status=Order.DONE).order_by(
             '-status', 'registrated_at')
-        return unprocessed_orders
+        return not_done_orders
 
     def get_available_restaurants(self):
         restaurant_menu_items = RestaurantMenuItem.objects.filter(

@@ -142,7 +142,7 @@ def get_addresses_coordinates(addresses: list) -> dict:
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.unprocessed() \
+    orders = Order.objects.not_done_orders() \
         .select_related('cooking_restaurant') \
         .prefetch_related('elements__product') \
         .get_total_price() \
