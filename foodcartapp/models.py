@@ -137,8 +137,10 @@ class OrderQuerySet(models.QuerySet):
         return orders
 
     def get_total_price(self):
-        orders = self.annotate(
-            total_price=Sum('elements__full_price_in_order'))
+        orders = self.annotate(total_price=Sum(ExpressionWrapper(
+            F('elements__quantity') * F(
+                'elements__price_in_order'),
+            output_field=DecimalField())))
         return orders
 
     def unprocessed(self):
@@ -267,7 +269,7 @@ class OrderElements(models.Model):
         verbose_name="Количество товара",
         validators=[MinValueValidator(1)]
     )
-    full_price_in_order = models.DecimalField(
+    price_in_order = models.DecimalField(
         verbose_name="Стоимость в заказе",
         max_digits=10,
         decimal_places=1,
@@ -280,3 +282,6 @@ class OrderElements(models.Model):
 
     def __str__(self):
         return f'{self.product} {self.order}'
+
+    def get_product_price(self):
+        return self.product.price

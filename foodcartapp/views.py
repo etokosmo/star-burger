@@ -103,7 +103,7 @@ def register_order(request):
             order=order,
             product=product,
             quantity=quantity,
-            full_price_in_order=product.price * quantity
+            price_in_order=product.price
         )
     serialize_order = OrderSerializer(order)
     return Response(serialize_order.data)

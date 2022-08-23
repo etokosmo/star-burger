@@ -21,6 +21,7 @@ class RestaurantMenuItemInline(admin.TabularInline):
 
 class OrderElementsInline(admin.TabularInline):
     model = OrderElements
+    readonly_fields = ["price_in_order"]
     extra = 0
 
 
@@ -143,4 +144,10 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderElements)
 class OrderElementsAdmin(admin.ModelAdmin):
     raw_id_fields = ("order", "product")
-    list_display = ["order", "product", "quantity", "full_price_in_order"]
+    list_display = ["order", "product", "quantity", "price_in_order",
+                    "get_product_price"]
+
+    def get_product_price(self, obj):
+        return obj.get_product_price()
+
+    get_product_price.short_description = 'Стоимость продукта на данный момент'
