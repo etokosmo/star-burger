@@ -262,7 +262,7 @@ class OrderElements(models.Model):
         verbose_name="Количество товара",
         validators=[MinValueValidator(1)]
     )
-    price_in_order = models.DecimalField(
+    full_price_in_order = models.DecimalField(
         verbose_name="Стоимость в заказе",
         max_digits=10,
         decimal_places=1,

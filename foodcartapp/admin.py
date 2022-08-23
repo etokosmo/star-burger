@@ -143,4 +143,4 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderElements)
 class OrderElementsAdmin(admin.ModelAdmin):
     raw_id_fields = ("order", "product")
-    list_display = ["order", "product", "quantity", "price_in_order"]
+    list_display = ["order", "product", "quantity", "full_price_in_order"]
