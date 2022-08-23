@@ -131,8 +131,8 @@ class OrderQuerySet(models.QuerySet):
 
     def get_total_price(self):
         orders = self.annotate(total_price=Sum(ExpressionWrapper(
-            F('order_elements__quantity') * F(
-                'order_elements__product__price'),
+            F('elements__quantity') * F(
+                'elements__product__price'),
             output_field=DecimalField())))
         return orders
 
@@ -153,7 +153,7 @@ class OrderQuerySet(models.QuerySet):
                 restaurant_products[item.restaurant].add(item.product)
         for order in self:
             products = [order_elements.product for order_elements in
-                        order.order_elements.all()]
+                        order.elements.all()]
             available_restaurants = []
             for restaurant, menu in restaurant_products.items():
                 if set(products).issubset(menu):
@@ -250,7 +250,7 @@ class OrderElements(models.Model):
         Order,
         on_delete=models.CASCADE,
         verbose_name="Заказ",
-        related_name='order_elements',
+        related_name='elements',
     )
     product = models.ForeignKey(
         Product,

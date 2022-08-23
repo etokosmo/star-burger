@@ -144,7 +144,7 @@ def get_addresses_coordinates(addresses: list) -> dict:
 def view_orders(request):
     orders = Order.objects.unprocessed() \
         .select_related('restaurant') \
-        .prefetch_related('order_elements__product') \
+        .prefetch_related('elements__product') \
         .get_total_price() \
         .get_available_restaurants()
     orders_coordinates = get_addresses_coordinates(
