@@ -1,35 +1,14 @@
 from django.db import transaction
 from django.http import JsonResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.serializers import ModelSerializer
 
-from banners.models import Banner, Slug
+from banners.models import Slug
 from .models import Product, Order, OrderElements
-
-
-class OrderElementsSerializer(ModelSerializer):
-    class Meta:
-        model = OrderElements
-        fields = ['product', 'quantity']
-
-
-class OrderSerializer(ModelSerializer):
-    products = OrderElementsSerializer(many=True,
-                                       allow_empty=False,
-                                       write_only=True)
-
-    class Meta:
-        model = Order
-        fields = ['id', 'firstname', 'lastname', 'phonenumber', 'address',
-                  'products']
-
-    def create(self, validated_data):
-        return Order.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        return Order.objects.update(**validated_data)
+from .serializers import OrderSerializer, OrderDeleteSerializer, \
+    OrderUpdateSerializer
 
 
 def get_banner(request, slug_title):
@@ -84,12 +63,7 @@ def product_list_api(request):
     })
 
 
-@transaction.atomic
-@api_view(['POST'])
-def register_order(request):
-    serializer = OrderSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-
+def create_order(serializer: OrderSerializer) -> Response:
     order = Order.objects.create(
         firstname=serializer.validated_data['firstname'],
         lastname=serializer.validated_data['lastname'],
@@ -107,3 +81,47 @@ def register_order(request):
         )
     serialize_order = OrderSerializer(order)
     return Response(serialize_order.data)
+
+
+def delete_order(serializer: OrderDeleteSerializer) -> Response:
+    order = get_object_or_404(Order, id=serializer.validated_data["id"])
+    serialize_order = OrderSerializer(order)
+    order.delete()
+    return Response(serialize_order.data)
+
+
+def update_order(serializer: OrderUpdateSerializer) -> Response:
+    order = get_object_or_404(Order, id=serializer.validated_data["id"])
+    firstname = serializer.validated_data.get('firstname')
+    if firstname:
+        order.firstname = firstname
+    lastname = serializer.validated_data.get('lastname')
+    if lastname:
+        order.lastname = lastname
+    phonenumber = serializer.validated_data.get('phonenumber')
+    if phonenumber:
+        order.phonenumber = phonenumber
+    address = serializer.validated_data.get('address')
+    if address:
+        order.address = address
+    order.save()
+
+    serialize_order = OrderSerializer(order)
+    return Response(serialize_order.data)
+
+
+@transaction.atomic
+@api_view(['POST', 'PATCH', 'DELETE'])
+def register_order(request):
+    if request.method == 'POST':
+        serializer = OrderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return create_order(serializer)
+    if request.method == 'DELETE':
+        serializer = OrderDeleteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return delete_order(serializer)
+    if request.method == 'PATCH':
+        serializer = OrderUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return update_order(serializer)
