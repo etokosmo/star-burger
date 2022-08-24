@@ -199,7 +199,7 @@ class Order(models.Model):
         verbose_name="Статус заказа",
         max_length=2,
         choices=STATUS_CHOICES,
-        default='Необработанный',
+        default=UNPROCCESSED,
         db_index=True
     )
     payment = models.CharField(

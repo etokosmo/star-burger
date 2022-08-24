@@ -125,9 +125,16 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderElementsInline]
-    raw_id_fields = ("cooking_restaurant",)
     list_display = ["firstname", "lastname", "address", "status", "payment",
                     "cooking_restaurant", "status"]
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for instance in instances:
+            instance.price_in_order = instance.product.price
+            instance.save()
 
     def response_change(self, request, obj):
         res = super(OrderAdmin, self).response_change(request, obj)
@@ -146,6 +153,11 @@ class OrderElementsAdmin(admin.ModelAdmin):
     raw_id_fields = ("order", "product")
     list_display = ["order", "product", "quantity", "price_in_order",
                     "get_product_price"]
+    readonly_fields = ["price_in_order"]
+
+    def save_model(self, request, obj, form, change):
+        obj.price_in_order = obj.product.price
+        obj.save()
 
     def get_product_price(self, obj):
         return obj.get_product_price()
