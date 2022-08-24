@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
@@ -146,6 +148,29 @@ class OrderAdmin(admin.ModelAdmin):
                 return HttpResponseRedirect(request.GET['next'])
         else:
             return res
+
+    def render_change_form(self, request, context, *args, **kwargs):
+        order = kwargs['obj']
+
+        restaurant_menu_items = RestaurantMenuItem.objects.filter(
+            availability=True).select_related('product').select_related(
+            'restaurant')
+        restaurant_products = defaultdict(set)
+        for item in restaurant_menu_items:
+            restaurant_products[item.restaurant].add(item.product)
+
+        products = [order_elements.product for order_elements in
+                    order.elements.all()]
+        available_restaurants = []
+        for restaurant, menu in restaurant_products.items():
+            if set(products).issubset(menu):
+                available_restaurants.append(restaurant.id)
+        context['adminform'].form.fields[
+            'cooking_restaurant'].queryset = Restaurant.objects.filter(
+            id__in=available_restaurants)
+
+        return super(OrderAdmin, self).render_change_form(request, context,
+                                                          *args, **kwargs)
 
 
 @admin.register(OrderElements)
