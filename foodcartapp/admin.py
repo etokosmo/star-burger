@@ -139,7 +139,7 @@ class OrderAdmin(admin.ModelAdmin):
             instance.save()
 
     def response_change(self, request, obj):
-        res = super(OrderAdmin, self).response_change(request, obj)
+        res = super().response_change(request, obj)
         if "next" in request.GET:
             if url_has_allowed_host_and_scheme(
                 request.GET['next'],
@@ -169,8 +169,8 @@ class OrderAdmin(admin.ModelAdmin):
             'cooking_restaurant'].queryset = Restaurant.objects.filter(
             id__in=available_restaurants)
 
-        return super(OrderAdmin, self).render_change_form(request, context,
-                                                          *args, **kwargs)
+        return super().render_change_form(request, context,
+                                          *args, **kwargs)
 
 
 @admin.register(OrderElements)
