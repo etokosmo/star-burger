@@ -183,6 +183,7 @@ class OrderElementsAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.price_in_order = obj.product.price
         obj.save()
+        super().save_model(request, obj, form, change)
 
     def get_product_price(self, obj):
         return obj.get_product_price()

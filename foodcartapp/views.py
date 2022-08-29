@@ -66,7 +66,7 @@ def product_list_api(request):
     })
 
 
-def create_order(serializer: OrderSerializer) -> Response:
+def _create_order(serializer: OrderSerializer) -> Response:
     order = Order.objects.create(
         firstname=serializer.validated_data['firstname'],
         lastname=serializer.validated_data['lastname'],
@@ -86,14 +86,14 @@ def create_order(serializer: OrderSerializer) -> Response:
     return Response(serialize_order.data)
 
 
-def delete_order(serializer: OrderDeleteSerializer) -> Response:
+def _delete_order(serializer: OrderDeleteSerializer) -> Response:
     order = get_object_or_404(Order, id=serializer.validated_data["id"])
     serialize_order = OrderSerializer(order)
     order.delete()
     return Response(serialize_order.data)
 
 
-def update_order(serializer: OrderUpdateSerializer) -> Response:
+def _update_order(serializer: OrderUpdateSerializer) -> Response:
     order = get_object_or_404(Order, id=serializer.validated_data["id"])
     firstname = serializer.validated_data.get('firstname')
     if firstname:
@@ -117,16 +117,16 @@ def update_order(serializer: OrderUpdateSerializer) -> Response:
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 @api_view(['POST', 'PATCH', 'DELETE'])
-def register_order(request):
+def handle_order(request):
     if request.method == 'POST':
         serializer = OrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return create_order(serializer)
+        return _create_order(serializer)
     if request.method == 'DELETE':
         serializer = OrderDeleteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return delete_order(serializer)
+        return _delete_order(serializer)
     if request.method == 'PATCH':
         serializer = OrderUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return update_order(serializer)
+        return _update_order(serializer)
