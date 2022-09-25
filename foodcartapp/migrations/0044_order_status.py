@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='order',
             name='status',
-            field=models.CharField(choices=[('Подтверждение', 'Подтверждение'), ('Готовится', 'Готовится'), ('Доставка', 'Доставка'), ('Выполнен', 'Выполнен')], db_index=True, default='Подтверждение', max_length=13, verbose_name='Статус заказа'),
+            field=models.CharField(choices=[('Подтверждение', 'Подтверждение'), ('Готовится', 'Готовится'), ('Доставка', 'Доставка'), ('Выполнен', 'Выполнен')], db_index=True, default='Подтверждение', max_length=40, verbose_name='Статус заказа'),
         ),
     ]
