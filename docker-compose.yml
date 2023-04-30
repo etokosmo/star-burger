@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:12.0-alpine
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - 5436:5432
+
+  web:
+    build: backend
+    image: star_burger_backend
+    volumes:
+      - ./backend:/code
+      - static_volume:/code/bundles
+      - media_volume:/code/media
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG}
+      DATABASE_URL: ${DATABASE_URL}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS-127.0.0.1,localhost}
+      ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
+      ROLLBAR_ENVIRONMENT: ${ROLLBAR_ENVIRONMENT}
+      YANDEX_GEO_API_TOKEN: ${YANDEX_GEO_API_TOKEN}
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+      - parcel
+    command:
+      bash entrypoint.sh
+
+  parcel:
+    build: frontend
+    image: star_burger_frontend
+    volumes:
+      - static_volume:/code/bundles
+    ports:
+      - 127.0.0.1:3000:3000
+    command: ./node_modules/.bin/parcel watch bundles-src/index.js --dist-dir bundles --public-url="./"
+
+volumes:
+  db_data:
+  static_volume:
+  media_volume:
