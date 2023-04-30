@@ -44,7 +44,7 @@ services:
     command: ./node_modules/.bin/parcel watch bundles-src/index.js --dist-dir bundles --public-url="./"
 
   nginx:
-    build: staticfloat/nginx-certbot
+    image: staticfloat/nginx-certbot
     volumes:
       - static_volume:/opt/static
       - media_volume:/opt/media
