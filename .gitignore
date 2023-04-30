@@ -1,5 +1,6 @@
 db.json
 data_dump.json
+staticfiles
 bundles/**
 node_modules/
 media/
