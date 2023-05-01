@@ -1,21 +1,115 @@
-# Сайт доставки еды Star Burger
+# Star Burger food delivery website
 
-Это сайт сети ресторанов Star Burger. Здесь можно заказать превосходные бургеры с доставкой на дом.
+This is the website of the Star Burger restaurant chain. Here you can order excellent burgers with home delivery.
 
-Пример доступен по [ссылке: etokosmo.ru](https://etokosmo.ru/).
+> An example of website is available at the link: [etokosmo.ru](https://etokosmo.ru/).
 
-![скриншот сайта](https://dvmn.org/filer/canonical/1594651635/686/)
+## About
 
+The Star Burger chain combines several restaurants operating under a single franchise. All restaurants have the same menu and the same prices. Just select a dish from the menu on the site and specify the place of delivery. We will find the nearest restaurant to you, cook everything and deliver it to you.
 
-Сеть Star Burger объединяет несколько ресторанов, действующих под единой франшизой. У всех ресторанов одинаковое меню и одинаковые цены. Просто выберите блюдо из меню на сайте и укажите место доставки. Мы сами найдём ближайший к вам ресторан, всё приготовим и привезём.
+### The site has three independent interfaces.
 
-На сайте есть три независимых интерфейса.
-* Первый — это публичная часть, где можно выбрать блюда из меню, и быстро оформить заказ без регистрации и SMS.
+<details>
+<summary>The first is the public part, where you can choose dishes from the menu and quickly place an order without registration and SMS.</summary>
 
-* Второй интерфейс предназначен для менеджера. Здесь происходит обработка заказов. Менеджер видит поступившие новые заказы и первым делом созванивается с клиентом, чтобы подтвердить заказ. После оператор выбирает ближайший ресторан и передаёт туда заказ на исполнение. Там всё приготовят и сами доставят еду клиенту.
+</details>
 
-* Третий интерфейс — это админка. Преимущественно им пользуются программисты при разработке сайта. Также сюда заходит менеджер, чтобы обновить меню ресторанов Star Burger.
+<details>
+<summary>The second interface is for the manager. This is where order processing takes place. The manager sees incoming new orders and first calls the client to confirm the order. After that, the operator selects the nearest restaurant and transfers the order there for execution. There, the dishes will be cooked and the food will be delivered to the client.</summary>
 
+</details>
+
+<details>
+<summary>The third interface is the admin panel. Mostly it is used by programmers when developing a site. The manager also comes in to update the Star Burger restaurant menu.</summary>
+
+</details>
+
+## Configurations
+
+* Python version: 3.9
+* Libraries: [requirements.txt](https://github.com/etokosmo/star-burger/blob/master/backend/requirements.txt)
+
+## Create `.env` file
+
+- Write the environment variables in the `.env` file in the format KEY=VALUE
+
+`SECRET_KEY` - A secret key for a particular Django installation. This is used to provide cryptographic signing, and should be set to a unique, unpredictable value.
+
+`ALLOWED_HOSTS` - A list of strings representing the host/domain names that this Django site can serve. This is a security measure to prevent HTTP Host header attacks, which are possible even under many seemingly-safe web server configurations.
+
+`DEBUG` - A boolean that turns on/off debug mode. If your app raises an exception when DEBUG is True, Django will display a detailed traceback, including a lot of metadata about your environment, such as all the currently defined Django settings (from settings.py).
+
+`POSTGRES_DB` - Set db name for creating Database.
+
+`POSTGRES_USER` - Set username for creating user.
+
+`POSTGRES_PASSWORD` - Set password for giving the user a password.
+
+`DATABASE_URL` - URL to db. For more information check [this](https://github.com/jazzband/dj-database-url).
+
+`YANDEX_GEO_API_TOKEN` — Yandex Geo API token. [For more information check documentation.](https://developer.tech.yandex.ru/)
+
+`ROLLBAR_ACCESS_TOKEN` — Rollbar token to have access to the logs. [For more information check documentation.](https://rollbar.com/)
+
+`ROLLBAR_ENVIRONMENT` — Site installation, default `development`
+
+`CERTBOT_EMAIL` - Your email for Certbot. You need this if you want deploy with SSL. [For more information check documentation.](https://certbot.eff.org/)
+
+## Deploy with Docker
+
+### Local version
+
+- Download code
+- Install Docker
+- Write the environment variables in the `.env` file in the format KEY=VALUE
+- Create images and run container with command:
+```bash
+docker compose up --build
+```
+- Open `localhost:8080`
+
+### Production version
+
+- Download code
+- Install Docker
+- Write the environment variables in the `.env` file in the format KEY=VALUE
+- Create images with command:
+```bash
+docker compose -f docker-compose.prod.yml build
+```
+- Run containers with command:
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+### Production version with SSL
+
+- Download code
+- Install Docker
+- Write the environment variables in the `.env` file in the format KEY=VALUE
+- Create images with command:
+```bash
+docker compose -f docker-compose.prod_ssl.yml build
+```
+- Run containers with command:
+```bash
+docker compose -f docker-compose.prod_ssl.yml up -d
+```
+- Set var `git_revision` with command:
+```bash
+git_revision=$(git rev-parse HEAD)
+```
+- Report a deploy to Rollbar 
+```bash
+curl --request POST \
+     --url https://api.rollbar.com/api/1/deploy \
+     --header 'X-Rollbar-Access-Token: '$ROLLBAR_ACCESS_TOKEN'' \
+     --header 'accept: application/json' \
+     --header 'content-type: application/json' \
+     --data '{"environment": "'$ROLLBAR_ENVIRONMENT'", "revision": "'$git_revision'"}'
+```
+
+## Launch without Docker
 
 ## Как запустить dev-версию сайта
 
