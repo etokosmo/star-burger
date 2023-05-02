@@ -13,15 +13,40 @@ The Star Burger chain combines several restaurants operating under a single fran
 <details>
 <summary>The first is the public part, where you can choose dishes from the menu and quickly place an order without registration and SMS.</summary>
 
+### Main website
+
+![Star Burger](https://user-images.githubusercontent.com/93794917/235744358-021efb43-1ca1-44a8-a8d4-67f7053fd715.gif)
+
+### Try to order
+
+![Star Burger (2)](https://user-images.githubusercontent.com/93794917/235748425-a2b4b9c5-6482-48ca-924c-6cf9b71b9c2f.gif)
+
+
 </details>
 
 <details>
 <summary>The second interface is for the manager. This is where order processing takes place. The manager sees incoming new orders and first calls the client to confirm the order. After that, the operator selects the nearest restaurant and transfers the order there for execution. There, the dishes will be cooked and the food will be delivered to the client.</summary>
 
+### You can manage orders
+
+![image](https://user-images.githubusercontent.com/93794917/235747843-10ef6a83-8445-4cc8-b9a7-3b38aafaa800.png)
+
+### You can manage menu
+
+![image](https://user-images.githubusercontent.com/93794917/235746333-7d76b21d-0f8d-426e-9653-5087cdd2a543.png)
+
+### You can manage restaurants
+
+![image](https://user-images.githubusercontent.com/93794917/235746450-927adf75-6644-48e7-aa60-bb29900ec069.png)
+
+
 </details>
 
 <details>
 <summary>The third interface is the admin panel. Mostly it is used by programmers when developing a site. The manager also comes in to update the Star Burger restaurant menu.</summary>
+
+![image](https://user-images.githubusercontent.com/93794917/235746969-5fbf71fb-8617-4022-b195-a396dd745c0d.png)
+
 
 </details>
 
