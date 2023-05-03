@@ -32,7 +32,7 @@ services:
       - db
       - parcel
     command:
-      bash entrypoint.sh
+      bash entrypoint_prod.sh
 
   parcel:
     build: frontend
