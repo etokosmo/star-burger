@@ -133,6 +133,10 @@ curl --request POST \
      --header 'content-type: application/json' \
      --data '{"environment": "'$ROLLBAR_ENVIRONMENT'", "revision": "'$git_revision'"}'
 ```
+- Or you can run deploy script with command:
+```bash
+./deploy_star_burger_docker.sh
+```
 
 ## Launch without Docker
 
